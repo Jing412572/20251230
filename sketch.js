@@ -169,17 +169,12 @@ let leftBtn, rightBtn, jumpBtn;
 let isLeftBtnDown = false, isRightBtnDown = false;
 
 function preload() {
-  // 修正：移除原本不存在的資料夾路徑，直接使用根目錄下的檔名
-  spriteSheet = loadImage('walk.png'); 
-  jumpSheet = loadImage('jump.png');
-  
-  // 修正：假設這些圖片也上傳到了根目錄
-  spriteSheet2 = loadImage('all_2.png'); 
-  spriteSheet3 = loadImage('all_3.png'); 
-  spriteSheet4 = loadImage('all_4.png'); 
-  spriteSheet5 = loadImage('all_5.png'); 
-
-  // 背景圖與表格路徑看起來是正確的
+  spriteSheet = loadImage('walk.png');  // 修正：直接讀取根目錄檔案
+  jumpSheet = loadImage('jump.png');    // 修正：直接讀取根目錄檔案
+  spriteSheet2 = loadImage('all_2.png'); // 修正：移除資料夾路徑
+  spriteSheet3 = loadImage('all_3.png'); // 修正：移除資料夾路徑
+  spriteSheet4 = loadImage('all_4.png'); // 修正：移除資料夾路徑
+  spriteSheet5 = loadImage('all_5.png'); // 修正：移除資料夾路徑
   bgImg = loadImage('origbig.png');
   questionBank = loadTable('questions.csv', 'csv', 'header');
   questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
