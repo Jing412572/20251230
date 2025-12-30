@@ -169,16 +169,21 @@ let leftBtn, rightBtn, jumpBtn;
 let isLeftBtnDown = false, isRightBtnDown = false;
 
 function preload() {
-  spriteSheet = loadImage('1/walk/walk.png');
-  jumpSheet = loadImage('1/jump/jump.png');
-  spriteSheet2 = loadImage('2/all_2.png');
-  spriteSheet3 = loadImage('3/all_3.png');
-  spriteSheet4 = loadImage('4/all_4.png');
-  spriteSheet5 = loadImage('5/all_5.png');
+  // 修正：移除原本不存在的資料夾路徑，直接使用根目錄下的檔名
+  spriteSheet = loadImage('walk.png'); 
+  jumpSheet = loadImage('jump.png');
+  
+  // 修正：假設這些圖片也上傳到了根目錄
+  spriteSheet2 = loadImage('all_2.png'); 
+  spriteSheet3 = loadImage('all_3.png'); 
+  spriteSheet4 = loadImage('all_4.png'); 
+  spriteSheet5 = loadImage('all_5.png'); 
+
+  // 背景圖與表格路徑看起來是正確的
   bgImg = loadImage('origbig.png');
   questionBank = loadTable('questions.csv', 'csv', 'header');
-  questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); // 載入角色3的題庫
-  questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); // 載入角色4的題庫
+  questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
+  questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
 }
 
 function setup() {
