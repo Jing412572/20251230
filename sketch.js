@@ -34,16 +34,17 @@ let introFullText = "【 任務：挑戰汪汪知識王 】\n" + "冒險者，�
 let introDisplayedText = "", isFastForwarding = false, isPaused = false, isShopping = false, pausedScreenshot, resumeButton, reviveGemButton, reviveAdButton, pauseShopButton, shopCloseButton, buyPotionBtn, buyMagnetBtn, buyShieldBtn, pauseQuitButton, pauseRestartButton, pauseBtn, submitButton, optionButtons = [], leftBtn, rightBtn, jumpBtn, isLeftBtnDown = false, isRightBtnDown = false;
 let gameStartTime = 0, finalPlayTimeStr = '00:00';
 function preload() {
-  spriteSheet = loadImage('1/walk.png');
+  //
+  spriteSheet = loadImage('1/walk.png'); 
   jumpSheet = loadImage('1/jump.png');
-  spriteSheet2 = loadImage('2/all_2.png');
-  spriteSheet3 = loadImage('3/all_3.png');
-  spriteSheet4 = loadImage('4/all_4.png');
-  spriteSheet5 = loadImage('5/all_5.png');
+  spriteSheet2 = loadImage('2/all_2.png'); 
+  spriteSheet3 = loadImage('3/all_3.png'); 
+  spriteSheet4 = loadImage('4/all_4.png'); 
+  spriteSheet5 = loadImage('5/all_5.png'); 
+
   bgImg = loadImage('origbig.png');
   questionBank = loadTable('questions.csv', 'csv', 'header');
-  questionBank3 = loadTable('questions_3.csv', 'csv', 'header');
-  questionBank4 = loadTable('questions_4.csv', 'csv', 'header');
+  //
 }
 
 function setup() {
