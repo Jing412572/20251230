@@ -252,3 +252,6 @@ function removeSpriteBackground(img) {
     img.updatePixels();
   }
 }
+function draw() {
+  // 處理 gameState, background, player 控制等核心代碼
+}
