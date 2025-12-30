@@ -35,8 +35,8 @@ let introDisplayedText = "", isFastForwarding = false, isPaused = false, isShopp
 let gameStartTime = 0, finalPlayTimeStr = '00:00';
 
 function preload() {
-  spriteSheet = loadImage('1/walk/walk.png'';
-  jumpSheet = loadImage('1/jump/jump.png');
+  spriteSheet = loadImage('1/walk.png'';
+  jumpSheet = loadImage('1/jump.png');
   spriteSheet2 = loadImage('2/all_2.png');
   spriteSheet3 = loadImage('3/all_3.png');
   spriteSheet4 = loadImage('4/all_4.png');
