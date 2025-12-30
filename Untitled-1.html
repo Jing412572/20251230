@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background-color: #2a2a2a; /* 模擬遊戲背景 */
+        font-family: "Microsoft JhengHei", sans-serif;
+    }
+
+    /* 全螢幕遮罩容器 */
+    .victory-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7); /* 半透明黑底 */
+        backdrop-filter: blur(4px);      /* 背景模糊 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* 防止旋轉背景超出範圍 */
+    }
+
+    /* 遊戲結算面板 (卡片式設計) */
+    .victory-panel {
+        background: #fff;
+        border: 6px solid #000;
+        border-radius: 30px;
+        padding: 40px 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 15px 15px 0px rgba(0,0,0,0.3);
+        z-index: 1;
+        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative; /* 讓絕對定位的印章以此為基準 */
+    }
+
+    /* 匯入一個較粗的字體，這裡使用系統預設粗體示範，建議尋找如 "Bangers" 或日系漫畫字體 */
+    .comic-text {
+        /* 使用 Google Fonts 的 "ZCOOL KuaiLe" (快樂體)，更有遊戲感 */
+        font-family: "ZCOOL KuaiLe", "Microsoft JhengHei", sans-serif;
+        font-weight: 400; /* 快樂體本身就很粗，不需額外加粗 */
+        font-size: clamp(150px, 25vw, 300px); /* 響應式字體：再加大尺寸 */
+        
+        display: inline-block; /* 確保漸層與濾鏡正確套用 */
+        
+        /* 改回穩定的實色填充，確保文字一定會顯示 */
+        color: #FFD700; 
+        background: none;
+        -webkit-text-stroke: 5px #000;
+        text-shadow: 10px 10px 0px #000;
+        filter: none;
+        
+        transform: rotate(-5deg) skew(-5deg);
+        
+        margin-bottom: 30px;
+        animation: title-idle 2s ease-in-out infinite alternate; /* 加入呼吸動畫 */
+    }
+
+    /* 星星評分系統 */
+    .star-container {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .star {
+        font-size: 80px;
+        color: #d1d1d1; /* 未獲得時的灰色 */
+        -webkit-text-stroke: 3px black;
+        text-shadow: 4px 4px 0px #000;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .star.active {
+        color: #FFD700; /* 獲得時的金色 */
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    /* 詳細數據列表 */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        width: 100%;
+        margin-bottom: 25px;
+        border-bottom: 2px dashed #ccc; /* 分隔線 */
+        padding-bottom: 20px;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-label {
+        font-size: 24px;
+        color: #888;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .stat-value {
+        font-size: 40px;
+        font-weight: 900;
+        color: #333;
+    }
+
+    /* 經驗值條 (XP Bar) - 增加遊戲成長感 */
+    .xp-wrapper {
+        width: 100%;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: bold;
+        position: relative; /* 為 Level Up 文字定位 */
+    }
+    .lvl-badge {
+        background: #333;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 16px;
+        border: 2px solid #000;
+    }
+    .xp-bar-bg {
+        flex-grow: 1;
+        height: 20px;
+        background: #eee;
+        border-radius: 10px;
+        border: 3px solid #000;
+        overflow: hidden;
+        position: relative;
+    }
+    .xp-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2ed573, #7bed9f);
+        width: 0%; /* 透過 JS 控制寬度動畫 */
+        transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .xp-text {
+        font-size: 16px;
+        color: #2ed573;
+        text-shadow: 1px 1px 0 #000;
+    }
+
+    /* Level Up 特效文字 */
+    .level-up-float {
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 48px;
+        color: #FFD700;
+        -webkit-text-stroke: 2px #000;
+        text-shadow: 4px 4px 0 #000;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10;
+    }
+    .level-up-anim {
+        animation: floatUp 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes floatUp {
+        0% { transform: translateX(-50%) scale(0) rotate(-10deg); opacity: 0; }
+        20% { transform: translateX(-50%) scale(1.2) rotate(0deg); opacity: 1; }
+        80% { transform: translateX(-50%) translateY(-50px) scale(1); opacity: 1; }
+        100% { transform: translateX(-50%) translateY(-80px) scale(0.8); opacity: 0; }
+    }
+
+    /* 評分印章 (Rank Stamp) */
+    .rank-stamp {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 100px;
+        font-weight: 900;
+        color: rgba(220, 20, 60, 0.8);
+        border: 8px solid rgba(220, 20, 60, 0.8);
+        border-radius: 50%;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform: scale(3) rotate(15deg);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 20;
+        mix-blend-mode: multiply; /* 讓印章有蓋在紙上的感覺 */
+    }
+    .rank-stamp.stamp-anim {
+        animation: stamp-slam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes stamp-slam {
+        0% { transform: scale(3) rotate(15deg); opacity: 0; }
+        100% { transform: scale(1) rotate(-15deg); opacity: 1; }
+    }
+
+    /* 戰利品寶箱 */
+    .loot-container {
+        margin: 10px 0;
+        text-align: center;
+        cursor: pointer;
+    }
+    .chest-icon {
+        font-size: 50px;
+        transition: transform 0.2s;
+        display: inline-block;
+    }
+    .chest-icon:hover {
+        transform: scale(1.2) rotate(-10deg);
+    }
+    .loot-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e67e22;
+        min-height: 27px; /* 預留高度 */
+    }
+
+    /* 音效開關 */
+    .sound-toggle {
+        position: absolute;
+        top: 20px;
+        right: 80px; /* 往左移，讓出位置給暫停鍵 */
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 100;
+        filter: drop-shadow(2px 2px 0 #000);
+        transition: transform 0.1s;
+        user-select: none;
+    }
+    .sound-toggle:active { transform: scale(0.9); }
+
+    /* 暫停按鈕 */
+    .pause-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 100;
+        filter: drop-shadow(2px 2px 0 #000);
+        transition: transform 0.1s;
+        user-select: none;
+    }
+    .pause-btn:active { transform: scale(0.9); }
+
+    /* 暫停選單模態視窗 */
+    .pause-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.2); /* 降低遮罩濃度，讓黑白畫面更清晰 */
+        backdrop-filter: grayscale(100%) contrast(1.5) brightness(1.1); /* 黑白漫畫濾鏡：去色 + 高對比 */
+        z-index: 300;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .pause-modal.show { display: flex; }
+
+    .pause-panel {
+        background: #fff;
+        border: 5px solid #000;
+        border-radius: 20px;
+        padding: 30px;
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 10px 10px 0 rgba(0,0,0,0.5);
+        animation: popIn 0.3s;
+        text-align: center;
+    }
+    .pause-title {
+        font-family: "ZCOOL KuaiLe", sans-serif;
+        font-size: 45px;
+        margin: 0 0 10px 0;
+        color: #333;
+        -webkit-text-stroke: 2px #000;
+    }
+    .pause-option {
+        padding: 12px;
+        font-size: 20px;
+        font-weight: bold;
+        border: 3px solid #000;
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        transition: 0.1s;
+        font-family: "Microsoft JhengHei", sans-serif;
+    }
+    .pause-option:hover {
+        background: #FFD700;
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0 #000;
+    }
+    .pause-option:active {
+        transform: translate(0, 0);
+        box-shadow: 0 0 0 #000;
+    }
+    .btn-quit-game { background: #ff7675; color: #fff; }
+    .btn-quit-game:hover { background: #d63031; color: #fff; }
+
+    /* 提示訊息 (Toast) */
+    .toast {
+        position: fixed;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 16px;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 200;
+        pointer-events: none;
+    }
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .score-row {
+        display: flex;
+        gap: 40px;
+        margin-bottom: 30px;
+        /* 移除旋轉，讓面板內排版更整齊 */
+    }
+
+    .score-text {
+        font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        font-weight: 900;
+        font-size: 60px;
+        color: #333; /* 改為深色字以適應白底面板 */
+        -webkit-text-stroke: 3px black;
+        text-shadow: none; /* 面板內不需要太重的陰影，保持乾淨 */
+    }
+
+    .high-score {
+        color: #ff4757; /* 最高分改用紅色突顯 */
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 20px;
+    }
+
+    /* 漫畫風格按鈕 */
+    .btn {
+        padding: 15px 40px;
+        font-size: 24px;
+        font-weight: bold;
+        border: 3px solid #000;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 5px 5px 0px #000;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .btn:hover {
+        transform: scale(1.1) rotate(-2deg); /* 滑鼠懸停時放大並歪斜 */
+        box-shadow: 8px 8px 0px #000;
+    }
+
+    .btn:active {
+        transform: translate(3px, 3px);
+        box-shadow: 2px 2px 0px #000;
+    }
+
+    .btn-retry { background: #fff; color: #000; }
+    .btn-next { background: #ff4757; color: #fff; }
+    .btn-share { background: #3498db; color: #fff; }
+
+    @keyframes popIn {
+        0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+        100% { transform: scale(1) rotate(-3deg) skew(-10deg); opacity: 1; }
+    }
+
+    /* 標題呼吸動畫 */
+    @keyframes title-idle {
+        0% { transform: rotate(-3deg) scale(1); }
+        100% { transform: rotate(-1deg) scale(1.05); }
+    }
+
+    /* 漫畫感旋轉放射背景 */
+    .sunburst {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200vmax;
+        height: 200vmax;
+        background: repeating-conic-gradient(
+            from 0deg,
+            rgba(255, 255, 255, 0.05) 0deg 15deg,
+            transparent 15deg 30deg
+        );
+        transform: translate(-50%, -50%);
+        animation: rotateBg 20s linear infinite;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    @keyframes rotateBg {
+        from { transform: translate(-50%, -50%) rotate(0deg); }
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* 彩帶特效樣式 */
+    .confetti {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        z-index: 2; /* 彩帶在最上層 */
+        pointer-events: none;
+        animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+        0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* 故障(Glitch)動畫效果 */
+    .glitch {
+        color: #ff3333 !important; /* 強制覆蓋原本的黃色 */
+        animation: glitch-anim 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+    }
+
+    @keyframes glitch-anim {
+        0% {
+            text-shadow: 8px 8px 0px #000;
+            transform: rotate(-3deg) skew(-10deg) translate(0);
+        }
+        20% {
+            text-shadow: 8px 8px 0px #000, -5px 0 #00ffff;
+            transform: rotate(-3deg) skew(-10deg) translate(-5px, 5px);
+        }
+        40% {
+            text-shadow: 8px 8px 0px #000, 5px -5px #ff0000;
+            transform: rotate(-3deg) skew(-10deg) translate(5px, -5px);
+        }
+        60% {
+            text-shadow: 8px 8px 0px #000;
+            transform: rotate(-3deg) skew(-10deg) translate(0);
+        }
+        80% {
+            text-shadow: 8px 8px 0px #000, 3px 0 #ffff00;
+            transform: rotate(-3deg) skew(-10deg) translate(-3px, 0);
+        }
+        100% {
+            text-shadow: 8px 8px 0px #000;
+            transform: rotate(-3deg) skew(-10deg) translate(0);
+        }
+
+        /* 失敗畫面震動特效 */
+        .shake-effect {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* 失敗原因提示框 */
+        .failure-reason {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+            background: rgba(255, 230, 230, 0.8);
+            padding: 10px 20px;
+            border: 2px dashed #e74c3c;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 51, 51, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
+        }
+    }
+</style>
+</head>
+<body>
+    <!-- 音效開關 -->
+    <div class="sound-toggle" onclick="toggleSound(this)">🔊</div>
+    <!-- 暫停按鈕 -->
+    <div class="pause-btn" onclick="togglePause()">⏸</div>
+
+    <div class="victory-screen">
+        <div class="sunburst"></div>
+        
+        <div class="victory-panel">
+            <div class="comic-text">恭喜通關!</div>
+            
+            <div class="star-container">
+                <div class="star">★</div>
+                <div class="star">★</div>
+                <div class="star">★</div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span class="stat-label">通關時間</span>
+                    <span class="stat-value">02:45</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">最大連擊</span>
+                    <span class="stat-value">x45</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">擊殺數</span>
+                    <span class="stat-value">128</span>
+                </div>
+            </div>
+
+            <!-- 評分印章 -->
+            <div id="rank-stamp" class="rank-stamp">S</div>
+
+            <!-- 新增經驗值條 -->
+            <div class="xp-wrapper">
+                <div class="level-up-float">LEVEL UP!</div>
+                <div class="lvl-badge">LV.15</div>
+                <div class="xp-bar-bg">
+                    <div class="xp-bar-fill" id="xp-fill"></div>
+                </div>
+                <div class="xp-text">+850 XP</div>
+            </div>
+
+            <!-- 戰利品寶箱 -->
+            <div class="loot-container" onclick="openChest(this)">
+                <div class="chest-icon">🎁</div>
+                <div class="loot-text">點擊開啟寶箱</div>
+            </div>
+
+            <div class="score-row">
+                <div id="score-display" class="score-text">最終分數: 0</div>
+                <div class="score-text high-score">最高: 15000</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-retry" onmouseenter="playHoverSound()" onclick="playClickSound(); location.reload()">重試</button>
+                <button class="btn btn-share" onmouseenter="playHoverSound()" onclick="playClickSound(); shareScore()">分享</button>
+                <button class="btn btn-next" onmouseenter="playHoverSound()" onclick="playClickSound(); alert('進入下一關...')">下一關</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 暫停選單 -->
+    <div id="pause-menu" class="pause-modal">
+        <div class="pause-panel">
+            <div class="pause-title">暫停</div>
+            <button class="pause-option" onclick="togglePause()">繼續遊戲</button>
+            <button class="pause-option btn-quit-game" onclick="window.close(); alert('遊戲已結束')">結束遊戲</button>
+            <button class="pause-option" onclick="location.reload()">重新開始</button>
+        </div>
+    </div>
+
+    <!-- 提示訊息 -->
+    <div id="toast" class="toast">已複製戰績到剪貼簿！</div>
+
+    <script>
+        // 自動產生慶祝彩帶
+        const colors = ['#ff4757', '#2ed573', '#ffa502', '#1e90ff', '#ffffff'];
+        const container = document.querySelector('.victory-screen');
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.top = -Math.random() * 20 + '%'; // 從畫面外上方開始
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // 隨機大小與動畫時間
+            const size = Math.random() * 10 + 8 + 'px';
+            confetti.style.width = size;
+            confetti.style.height = size;
+            confetti.style.animationDuration = (Math.random() * 3 + 2) + 's'; // 2~5秒落地
+            confetti.style.animationDelay = (Math.random() * 2) + 's';
+            
+            container.appendChild(confetti);
+        }
+
+        // 音效系統 (Web Audio API) - 產生復古遊戲音效
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMuted = false;
+        let masterVolume = 50; // 預設音量 50%
+        
+        function playTone(freq, type, duration) {
+            if (isMuted) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; // sine, square, triangle, sawtooth
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            // 根據 masterVolume 計算音量 (0~100 對應 0~0.1 的 gain)
+            const volume = (masterVolume / 100) * 0.1;
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime); 
+            
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playTickSound() { playTone(800, 'square', 0.05); } // 分數跳動聲
+        function playStarSound() { playTone(1200, 'sine', 0.3); }   // 星星獲得聲
+        function playHoverSound() { playTone(400, 'triangle', 0.1); } // 按鈕滑過
+        function playClickSound() { playTone(600, 'square', 0.1); }   // 按鈕點擊
+        function playStampSound() { playTone(150, 'sawtooth', 0.1); } // 印章聲
+        function playChestSound() { playTone(880, 'sine', 0.2); }     // 寶箱聲
+        function playLevelUpSound() { 
+            // 升級音效：快速的上行琶音
+            playTone(523.25, 'square', 0.1); // Do
+            setTimeout(() => playTone(659.25, 'square', 0.1), 100); // Mi
+            setTimeout(() => playTone(783.99, 'square', 0.1), 200); // Sol
+            setTimeout(() => playTone(1046.50, 'square', 0.4), 300); // High Do
+        }
+
+        function toggleSound(el) {
+            isMuted = !isMuted;
+            el.innerText = isMuted ? "🔇" : "🔊";
+            // 點擊時稍微震動一下
+            el.style.transform = "scale(0.8)";
+            setTimeout(() => el.style.transform = "scale(1)", 100);
+            
+            if (!isMuted) playClickSound();
+        }
+
+        // 暫停功能
+        function togglePause() {
+            const modal = document.getElementById('pause-menu');
+            if (modal.classList.contains('show')) {
+                modal.classList.remove('show');
+            } else {
+                modal.classList.add('show');
+                playClickSound();
+            }
+        }
+
+        // 分數滾動動畫
+        const scoreElement = document.getElementById('score-display');
+        const targetScore = 12800; // 本局分數
+        const duration = 2000;     // 動畫持續時間 (毫秒)
+        let startTime = null;
+        let lastSoundTime = 0;
+
+        function animateScore(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            
+            // 使用 Ease Out Cubic 緩動函數：讓數字一開始跑很快，最後慢慢停下
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            
+            const currentScore = Math.floor(easeProgress * targetScore);
+            scoreElement.innerText = `最終分數: ${currentScore}`;
+            
+            // 音效控制：每 80ms 觸發一次滴答聲，避免太吵
+            if (timestamp - lastSoundTime > 80 && progress < 1) {
+                playTickSound();
+                lastSoundTime = timestamp;
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animateScore);
+            } else {
+                // 分數跑完後，蓋上評分印章
+                setTimeout(() => {
+                    const stamp = document.getElementById('rank-stamp');
+                    // 根據分數決定等級
+                    if (targetScore >= 12000) stamp.innerText = "S";
+                    else if (targetScore >= 10000) stamp.innerText = "A";
+                    else stamp.innerText = "B";
+                    
+                    stamp.classList.add('stamp-anim');
+                    playStampSound(); // 播放蓋章音效
+                }, 500);
+            }
+        }
+
+        requestAnimationFrame(animateScore);
+
+        // 處理最高紀錄 (LocalStorage) - 即使重新開始也能保留
+        const highScoreElement = document.querySelector('.high-score');
+        let highScore = localStorage.getItem('gameHighScore') || 15000;
+        
+        if (targetScore > highScore) {
+            highScore = targetScore;
+            localStorage.setItem('gameHighScore', highScore);
+            highScoreElement.innerText = `最高: ${highScore} (新紀錄!)`;
+            highScoreElement.style.color = "#ff6b81"; // 新紀錄變色
+        } else {
+            highScoreElement.innerText = `最高: ${highScore}`;
+        }
+
+        // 星星依序亮起動畫
+        const stars = document.querySelectorAll('.star');
+        // 只有在勝利且分數足夠時才顯示星星
+        if (targetScore > 5000) {
+            stars.forEach((star, index) => {
+                setTimeout(() => {
+                    star.classList.add('active');
+                    playStarSound(); // 播放星星音效
+                }, 500 + (index * 400));
+            });
+        }
+
+        // XP條動畫邏輯：模擬升級過程
+        setTimeout(() => {
+            const xpFill = document.getElementById('xp-fill');
+            const lvlBadge = document.querySelector('.lvl-badge');
+            
+            // 1. 先填滿到 100%
+            xpFill.style.width = '100%';
+            
+            // 2. 觸發升級特效 (1.5秒後，等待填滿動畫結束)
+            setTimeout(() => {
+                playLevelUpSound();
+                document.querySelector('.level-up-float').classList.add('level-up-anim');
+                lvlBadge.innerText = "LV.16"; // 更新等級文字
+                lvlBadge.style.background = "#FFD700"; // 等級框變金色
+                lvlBadge.style.color = "#000";
+                xpFill.style.width = '0%'; // 重置條
+                
+                // 3. 填入新的經驗值 (再過 0.5秒)
+                setTimeout(() => {
+                    xpFill.style.transition = "width 0.5s ease-out"; // 加快第二次填充速度
+                    xpFill.style.width = '35%';
+                }, 500);
+            }, 1500);
+        }, 800);
+
+        // 寶箱開啟邏輯
+        let isChestOpened = false;
+        function openChest(element) {
+            if (isChestOpened) return;
+            isChestOpened = true;
+            
+            const icon = element.querySelector('.chest-icon');
+            const text = element.querySelector('.loot-text');
+            
+            playChestSound();
+            icon.innerText = "💰"; // 變成錢袋或打開的樣子
+            icon.style.transform = "scale(1.3)";
+            
+            // 隨機獎勵
+            const rewards = ["獲得 500 金幣!", "獲得新稱號: 速通王", "獲得道具: 復活藥水", "獲得 5 顆鑽石"];
+            const reward = rewards[Math.floor(Math.random() * rewards.length)];
+            text.innerText = reward;
+            text.style.color = "#27ae60";
+        }
+
+        // 分享功能
+        function shareScore() {
+            const text = `我在這款遊戲中獲得了 ${targetScore} 分！評級：${document.getElementById('rank-stamp').innerText}，快來挑戰我吧！`;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            });
+        }
+
+        // 模擬「遊戲結束/重新開始」狀態的邏輯
+        // 如果是失敗畫面，可以將 isVictory 設為 false
+        const isVictory = true; 
+
+        if (!isVictory) {
+            // 1. 修改標題：紅黑配色，製造壓迫感
+            const title = document.querySelector('.comic-text');
+            title.innerText = "遊戲結束";
+            title.classList.add('glitch'); // 加入故障動畫類別
+            // 遊戲結束時移除漸層，改回純色以配合故障效果
+            title.style.background = "none";
+            title.style.color = "#ff3333";
+            
+            // 2. 修改背景放射線為紅色警示風格
+            document.querySelector('.sunburst').style.background = 
+                "repeating-conic-gradient(from 0deg, rgba(220, 20, 60, 0.15) 0deg 15deg, transparent 15deg 30deg)";
+
+            // 3. 修改面板邊框顏色
+            document.querySelector('.victory-panel').style.borderColor = "#8b0000"; // 深紅邊框
+
+            // 4. 移除慶祝元素 (星星、下一關按鈕、彩帶)
+            document.querySelector('.star-container').style.display = "none"; 
+            document.querySelector('.btn-next').style.display = "none";       
+            document.querySelector('.xp-wrapper').style.display = "none"; // 失敗時隱藏XP條
+            document.querySelector('.loot-container').style.display = "none"; // 失敗時隱藏寶箱
+            document.getElementById('rank-stamp').style.display = "none";     // 失敗時隱藏評分
+            document.querySelectorAll('.confetti').forEach(el => el.remove());
+
+            // 5. 加入面板震動效果 (模擬撞擊/失敗)
+            document.querySelector('.victory-panel').classList.add('shake-effect');
+
+            // 6. 隨機顯示失敗原因/提示 (增加遊戲趣味性)
+            const reasons = ["死因：踩到了香蕉皮", "提示：BOSS 放大招時記得躲", "死因：忘記補血", "提示：貪刀是失敗的主因", "死因：被路邊的小怪打死"];
+            const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
+            
+            const reasonDiv = document.createElement('div');
+            reasonDiv.classList.add('failure-reason');
+            reasonDiv.innerText = randomReason;
+            
+            // 插入到按鈕上方
+            const btnGroup = document.querySelector('.btn-group');
+            btnGroup.parentNode.insertBefore(reasonDiv, btnGroup);
+
+            // 7. 讓重試按鈕更顯眼 (紅色呼吸燈效果)
+            const retryBtn = document.querySelector('.btn-retry');
+            retryBtn.style.animation = "pulse-red 2s infinite";
+            retryBtn.style.borderColor = "#ff3333";
+            retryBtn.style.color = "#ff3333";
+        }
+    </script>
+</body>
+</html>
