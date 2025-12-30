@@ -187,17 +187,15 @@ function preload() {
 }
 
 function preload() {
-  // 核心修正：移除所有資料夾路徑，因為你的圖片直接放在 GitHub 根目錄
+  // 第 173 行
   spriteSheet = loadImage('walk.png'); 
+  // 第 174 行
   jumpSheet = loadImage('jump.png');
   
-  // 這些也要一併修正，否則後續也會 404
-  spriteSheet2 = loadImage('all_2.png'); 
-  spriteSheet3 = loadImage('all_3.png'); 
-  spriteSheet4 = loadImage('all_4.png'); 
-  spriteSheet5 = loadImage('all_5.png'); 
-
-  // 背景圖與 CSV 表格
+  spriteSheet2 = loadImage('all_2.png');
+  spriteSheet3 = loadImage('all_3.png');
+  spriteSheet4 = loadImage('all_4.png');
+  spriteSheet5 = loadImage('all_5.png');
   bgImg = loadImage('origbig.png');
   questionBank = loadTable('questions.csv', 'csv', 'header');
   questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
