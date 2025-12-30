@@ -186,23 +186,23 @@ function preload() {
   questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
 }
 
-function setup() {
-  // 建立一個 2000x2000 的畫布
-  createCanvas(windowWidth, windowHeight);
-
-  // 載入寶石數量 (如果沒有存檔則為 0)
-  gemCount = parseInt(localStorage.getItem('gemCount') || '0');
-
-  // 新增：載入統計數據與成就狀態
-  let savedStats = JSON.parse(localStorage.getItem('gameStats'));
-  if (savedStats) gameStats = savedStats;
+function preload() {
+  // 核心修正：移除所有資料夾路徑，因為你的圖片直接放在 GitHub 根目錄
+  spriteSheet = loadImage('walk.png'); 
+  jumpSheet = loadImage('jump.png');
   
-  let savedAch = JSON.parse(localStorage.getItem('achievements'));
-  if (savedAch) {
-      ACHIEVEMENTS.forEach(ach => {
-          if (savedAch[ach.id]) ach.unlocked = true;
-      });
-  }
+  // 這些也要一併修正，否則後續也會 404
+  spriteSheet2 = loadImage('all_2.png'); 
+  spriteSheet3 = loadImage('all_3.png'); 
+  spriteSheet4 = loadImage('all_4.png'); 
+  spriteSheet5 = loadImage('all_5.png'); 
+
+  // 背景圖與 CSV 表格
+  bgImg = loadImage('origbig.png');
+  questionBank = loadTable('questions.csv', 'csv', 'header');
+  questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
+  questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
+}
 
   // 初始化有趣的題目 (覆蓋 CSV 載入的內容)
   initQuestions();
