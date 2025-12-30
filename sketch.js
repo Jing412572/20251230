@@ -187,11 +187,8 @@ function preload() {
 }
 
 function preload() {
-  // 第 173 行
-  spriteSheet = loadImage('walk.png'); 
-  // 第 174 行
+  spriteSheet = loadImage('walk.png');
   jumpSheet = loadImage('jump.png');
-  
   spriteSheet2 = loadImage('all_2.png');
   spriteSheet3 = loadImage('all_3.png');
   spriteSheet4 = loadImage('all_4.png');
@@ -200,7 +197,7 @@ function preload() {
   questionBank = loadTable('questions.csv', 'csv', 'header');
   questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
   questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
-}
+} //
 
   // 初始化有趣的題目 (覆蓋 CSV 載入的內容)
   initQuestions();
