@@ -168,23 +168,27 @@ let optionButtons = []; // 新增：選項按鈕陣列
 let leftBtn, rightBtn, jumpBtn;
 let isLeftBtnDown = false, isRightBtnDown = false;
 
-// --- 修改後的 preload 函式 (約在 170 行) ---
+//
 function preload() {
-  // 核心修正：移除所有資料夾前綴，直接讀取根目錄檔案
+  // 核心修正：移除所有資料夾前綴 (如 1/walk/)，直接讀取根目錄檔案
   spriteSheet = loadImage('walk.png'); 
   jumpSheet = loadImage('jump.png');
-  spriteSheet2 = loadImage('all_2.png'); 
-  spriteSheet3 = loadImage('all_3.png'); 
-  spriteSheet4 = loadImage('all_4.png'); 
-  spriteSheet5 = loadImage('all_5.png'); 
+  
+  // 修正其餘角色圖片路徑 (假設 all_2.png 等已放在資料夾 2, 3, 4, 5 內)
+  // 如果這些圖也直接放在根目錄，請把 '2/', '3/' 等字樣刪掉
+  spriteSheet2 = loadImage('2/all_2.png'); 
+  spriteSheet3 = loadImage('3/all_3.png'); 
+  spriteSheet4 = loadImage('4/all_4.png'); 
+  spriteSheet5 = loadImage('5/all_5.png'); 
 
+  // 背景圖與 CSV 表格 (目前截圖顯示在根目錄，這樣寫是正確的)
   bgImg = loadImage('origbig.png');
   questionBank = loadTable('questions.csv', 'csv', 'header');
   questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
   questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
-} 
+}
 
-// --- 修改後的 setup 函式 (接在 preload 之後) ---
+// 
 function setup() {
   // 建立畫布
   createCanvas(windowWidth, windowHeight);
