@@ -168,43 +168,47 @@ let optionButtons = []; // 新增：選項按鈕陣列
 let leftBtn, rightBtn, jumpBtn;
 let isLeftBtnDown = false, isRightBtnDown = false;
 
+// --- 修改後的 preload 函式 (約在 170 行) ---
 function preload() {
-  // 修正：直接讀取根目錄檔案，確保沒有資料夾前綴
+  // 核心修正：移除所有資料夾前綴，直接讀取根目錄檔案
   spriteSheet = loadImage('walk.png'); 
   jumpSheet = loadImage('jump.png');
-  
-  // 修正：假設這些角色圖也上傳到了 GitHub 根目錄
   spriteSheet2 = loadImage('all_2.png'); 
   spriteSheet3 = loadImage('all_3.png'); 
   spriteSheet4 = loadImage('all_4.png'); 
   spriteSheet5 = loadImage('all_5.png'); 
 
-  // 背景圖與表格路徑
   bgImg = loadImage('origbig.png');
   questionBank = loadTable('questions.csv', 'csv', 'header');
   questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
   questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
-}
+} 
 
-function preload() {
-  spriteSheet = loadImage('walk.png');
-  jumpSheet = loadImage('jump.png');
-  spriteSheet2 = loadImage('all_2.png');
-  spriteSheet3 = loadImage('all_3.png');
-  spriteSheet4 = loadImage('all_4.png');
-  spriteSheet5 = loadImage('all_5.png');
-  bgImg = loadImage('origbig.png');
-  questionBank = loadTable('questions.csv', 'csv', 'header');
-  questionBank3 = loadTable('questions_3.csv', 'csv', 'header'); 
-  questionBank4 = loadTable('questions_4.csv', 'csv', 'header'); 
-} //
+// --- 修改後的 setup 函式 (接在 preload 之後) ---
+function setup() {
+  // 建立畫布
+  createCanvas(windowWidth, windowHeight);
 
-  // 初始化有趣的題目 (覆蓋 CSV 載入的內容)
+  // 載入寶石數量
+  gemCount = parseInt(localStorage.getItem('gemCount') || '0');
+
+  // 載入統計數據與成就狀態
+  let savedStats = JSON.parse(localStorage.getItem('gameStats'));
+  if (savedStats) gameStats = savedStats;
+  
+  let savedAch = JSON.parse(localStorage.getItem('achievements'));
+  if (savedAch) {
+      ACHIEVEMENTS.forEach(ach => {
+          if (savedAch[ach.id]) ach.unlocked = true;
+      });
+  }
+
+  // 初始化題目
   initQuestions();
 
-  noSmooth(); // 關閉平滑濾鏡，讓像素圖放大後保持清晰，避免模糊重影
+  noSmooth(); 
 
-  // 加入彈跳動畫的 CSS 樣式
+  // 加入 CSS 動畫
   let css = `
     @keyframes bounceIn {
       0% { transform: scale(0.1); opacity: 0; }
@@ -217,37 +221,38 @@ function preload() {
   `;
   createElement('style', css);
 
-  // 初始化角色位置
+  // 初始化角色與遊戲物件
   charX = width / 2;
   charY = height * 0.85;
   isOnGround = true;
 
-  char2X = width * 0.75; // 設定在角色1 (width/2) 的右邊
+  char2X = width * 0.75;
   char2Y = height * 0.85;
-
-  char3X = width * 0.9; // 設定在角色2 的右邊
+  char3X = width * 0.9;
   char3Y = height * 0.85;
-
-  char4X = width * 1.05; // 設定在角色3 的右邊
+  char4X = width * 1.05;
   char4Y = height * 0.85;
 
-  spawnGems(); // 新增：初始化生成寶石
-  spawnMagnets(); // 新增：初始化生成磁鐵
-  spawnBombs(); // 新增：初始化生成炸彈
-  spawnTimeStopWatches(); // 新增：初始化生成懷錶
-  spawnStars(); // 新增：初始化生成星星
-  spawnMushrooms(); // 新增：初始化生成蘑菇
+  spawnGems();
+  spawnMagnets();
+  spawnBombs();
+  spawnTimeStopWatches();
+  spawnStars();
+  spawnMushrooms();
 
-  char5X = width * 1.2; // 設定在角色4 的右邊
+  char5X = width * 1.2;
   char5Y = height * 0.85;
 
-  // 移除角色圖片背景
+  // 移除圖片背景
   removeSpriteBackground(spriteSheet);
   removeSpriteBackground(jumpSheet);
   removeSpriteBackground(spriteSheet2);
   removeSpriteBackground(spriteSheet3);
   removeSpriteBackground(spriteSheet4);
   removeSpriteBackground(spriteSheet5);
+
+  // 此處接續你原本剩餘的 setup 邏輯 (按鈕建立、輸入框等)...
+}
 
   // 計算縮放比例
   let frameWidth1 = spriteSheet.width / walkFrames;
