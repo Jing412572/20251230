@@ -155,4 +155,44 @@ function setup() {
   imageMode(CENTER);
 }
 
-// --- 剩餘的功能函式維持原樣 (draw, handleInteraction, classes 等) ---
+// 
+// --- 初始化題庫函式 (請貼在檔案最末端) ---
+function initQuestions() {
+  function createTableFromData(dataArray) {
+    let table = new p5.Table();
+    table.addColumn('題目');
+    table.addColumn('答案');
+    table.addColumn('提示');
+    table.addColumn('答對回饋');
+    table.addColumn('答錯回饋');
+    table.addColumn('選項1');
+    table.addColumn('選項2');
+    table.addColumn('選項3');
+    table.addColumn('used');
+    
+    for (let item of dataArray) {
+      let row = table.addRow();
+      row.setString('題目', item.q);
+      row.setString('答案', item.a);
+      row.setString('提示', item.h);
+      row.setString('答對回饋', item.c);
+      row.setString('答錯回饋', item.w);
+      row.setString('選項1', item.o[0]);
+      row.setString('選項2', item.o[1]);
+      row.setString('選項3', item.o[2]);
+      row.setString('used', 'no');
+    }
+    return table;
+  }
+
+  // 設定角色題庫內容
+  questionBank = createTableFromData([
+    { q: "哪種狗狗以擁有藍黑色的舌頭聞名？", a: "鬆獅犬", h: "毛蓬蓬像獅子", c: "答對了！是鬆獅犬", w: "再試試看", o: ["黃金獵犬", "鬆獅犬", "哈士奇"] }
+  ]);
+  questionBank3 = createTableFromData([
+    { q: "哪種感官是狗狗最強大的？", a: "嗅覺", h: "鼻子很靈", c: "沒錯！嗅覺超強", w: "不是視覺喔", o: ["視覺", "聽覺", "嗅覺"] }
+  ]);
+  questionBank4 = createTableFromData([
+    { q: "以下哪種食物對狗狗是劇毒？", a: "巧克力", h: "甜點", c: "正確！絕對不能吃", w: "不對喔", o: ["巧克力", "雞肉", "米飯"] }
+  ]);
+}
