@@ -34,8 +34,8 @@ let introFullText = "【 任務：挑戰汪汪知識王 】\n" + "冒險者，�
 let introDisplayedText = "", isFastForwarding = false, isPaused = false, isShopping = false, pausedScreenshot, resumeButton, reviveGemButton, reviveAdButton, pauseShopButton, shopCloseButton, buyPotionBtn, buyMagnetBtn, buyShieldBtn, pauseQuitButton, pauseRestartButton, pauseBtn, submitButton, optionButtons = [], leftBtn, rightBtn, jumpBtn, isLeftBtnDown = false, isRightBtnDown = false;
 let gameStartTime = 0, finalPlayTimeStr = '00:00';
 function preload() {
-  spriteSheet = loadImage('1/walk.png');
-  jumpSheet = loadImage('1/jump.png');
+  spriteSheet = loadImage('/walk.png');
+  jumpSheet = loadImage('/jump.png');
   spriteSheet2 = loadImage('all_2.png');
   spriteSheet3 = loadImage('all_3.png');
   spriteSheet4 = loadImage('all_4.png');
@@ -55,6 +55,14 @@ function setup() {
   if (savedAch) {
     ACHIEVEMENTS.forEach(ach => { if (savedAch[ach.id]) ach.unlocked = true; });
   }
+  function styleControlBtn(btn) {
+  btn.style('font-size', '30px');
+  btn.style('background-color', 'rgba(254, 252, 232, 0.6)');
+  btn.style('border', '3px solid rgba(63, 98, 18, 0.6)');
+  btn.style('border-radius', '50%');
+  btn.style('color', '#3f6212');
+  btn.style('cursor', 'pointer');
+}
 
   initQuestions();
   noSmooth();
