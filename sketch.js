@@ -757,7 +757,6 @@ function setup() {
 
   // 將圖片的繪製基準點設為中心
   imageMode(CENTER);
-}
 
 function styleControlBtn(btn) {
   btn.style('font-size', '30px');
