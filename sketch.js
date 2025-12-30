@@ -1,3 +1,4 @@
+
 let spriteSheet, jumpSheet, spriteSheet2, bgImg, spriteSheet3, spriteSheet4, spriteSheet5;
 let bgX = 0, screenShakeAmount = 0;
 let speedLines = [], footprints = [], dustParticles = [], confettiParticles = [], clearConfetti = [], fireworks = [], floatingTexts = [], notes = [];
