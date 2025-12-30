@@ -196,3 +196,59 @@ function initQuestions() {
     { q: "以下哪種食物對狗狗是劇毒？", a: "巧克力", h: "甜點", c: "正確！絕對不能吃", w: "不對喔", o: ["巧克力", "雞肉", "米飯"] }
   ]);
 }
+// --- 1. 物品生成系列函式 ---
+function spawnGems() {
+  for (let i = 0; i < 15; i++) {
+    gems.push({
+      x: random(width, width * 5),
+      y: random(height * 0.4, height * 0.8),
+      type: random(GEM_TYPES),
+      collected: false
+    });
+  }
+}
+
+function spawnMagnets() {
+  for (let i = 0; i < 3; i++) {
+    magnets.push({ x: random(width, width * 5), y: random(height * 0.4, height * 0.8), collected: false });
+  }
+}
+
+function spawnBombs() {
+  for (let i = 0; i < 5; i++) {
+    bombs.push({ x: random(width, width * 5), y: random(height * 0.4, height * 0.8), exploded: false });
+  }
+}
+
+function spawnTimeStopWatches() {
+  for (let i = 0; i < 2; i++) {
+    timeStopWatches.push({ x: random(width, width * 5), y: random(height * 0.4, height * 0.8), collected: false });
+  }
+}
+
+function spawnStars() {
+  for (let i = 0; i < 2; i++) {
+    stars.push({ x: random(width, width * 5), y: random(height * 0.4, height * 0.8), collected: false });
+  }
+}
+
+function spawnMushrooms() {
+  for (let i = 0; i < 2; i++) {
+    mushrooms.push({ x: random(width, width * 5), y: random(height * 0.4, height * 0.8), collected: false });
+  }
+}
+
+// --- 2. 圖片背景去背函式 (setup 裡有呼叫到) ---
+function removeSpriteBackground(img) {
+  if (!img) return;
+  img.loadPixels();
+  if (img.pixels.length > 0) {
+    let r = img.pixels[0], g = img.pixels[1], b = img.pixels[2];
+    for (let i = 0; i < img.pixels.length; i += 4) {
+      if (img.pixels[i] === r && img.pixels[i+1] === g && img.pixels[i+2] === b) {
+        img.pixels[i+3] = 0;
+      }
+    }
+    img.updatePixels();
+  }
+}
