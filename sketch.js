@@ -3913,4 +3913,4 @@ class SpeedLine {
     pop();
   }
   isDead() { return this.life <= 0; }
-
+}
